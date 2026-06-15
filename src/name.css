@@ -1,0 +1,62 @@
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+html, body { background: transparent; overflow: hidden; }
+body { font-family: 'Malgun Gothic', -apple-system, sans-serif; padding: 12px; }
+
+.card {
+  background: linear-gradient(160deg, #ffffff 0%, #fff6f1 100%);
+  border: 1px solid rgba(217,119,87,.25);
+  border-radius: 18px;
+  padding: 20px 18px;
+  box-shadow: 0 14px 36px rgba(0,0,0,.26);
+  color: #2b2b2b;
+  text-align: center;
+}
+
+.lang-toggle {
+  display: flex; gap: 6px; justify-content: center;
+  margin-bottom: 10px;
+}
+.lang {
+  border: 1.5px solid rgba(217,119,87,.3);
+  background: #fff; color: #b08a7a;
+  border-radius: 999px;
+  padding: 5px 14px; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  transition: all .15s;
+}
+.lang:hover { border-color: #d97757; }
+.lang.active {
+  background: linear-gradient(135deg, #e58a5f, #d97757);
+  border-color: #d97757; color: #fff;
+}
+
+.crab { font-size: 40px; margin-bottom: 6px; animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+.title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.desc { font-size: 12px; color: #7a6a62; line-height: 1.5; margin-bottom: 16px; }
+.desc b { color: #c2613f; }
+
+#name {
+  width: 100%;
+  border: 1.5px solid rgba(217,119,87,.35);
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 14px; font-family: inherit;
+  outline: none; text-align: center;
+  margin-bottom: 12px;
+  background: #fff;
+}
+#name:focus { border-color: #d97757; box-shadow: 0 0 0 3px rgba(217,119,87,.15); }
+
+.btn {
+  width: 100%;
+  border: none; border-radius: 12px; cursor: pointer;
+  padding: 12px; font-size: 14px; font-weight: 700;
+  font-family: inherit; color: #fff;
+  background: linear-gradient(135deg, #e58a5f, #d97757);
+  transition: transform .1s, filter .15s, opacity .15s;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }

@@ -1,0 +1,21 @@
+{
+  "name": "claude-pet",
+  "version": "0.1.0",
+  "description": "클로드 키우기 — 클로드 코드 토큰 사용량으로 키우는 데스크톱 펫",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "autostart": "node src/install.js",
+    "autostart:off": "node src/install.js --uninstall",
+    "autostart:status": "node src/install.js --status"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keras9496/claude-tamagotchi.git"
+  },
+  "homepage": "https://github.com/keras9496/claude-tamagotchi#readme",
+  "license": "CC-BY-NC-4.0",
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

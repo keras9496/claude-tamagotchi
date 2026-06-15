@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="status.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="avatar">🦀</div>
+      <div>
+        <div class="title" id="petName">Claw'd</div>
+        <div class="subtitle" id="model">claude</div>
+      </div>
+      <div class="mood-badge" id="moodBadge">happy</div>
+    </div>
+
+    <div class="msg" id="message">…</div>
+
+    <div class="gauge">
+      <div class="gauge-label"><span id="lblHappy"></span><span id="happyVal">–</span></div>
+      <div class="bar"><div class="fill happy" id="happyBar"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label"><span id="lblFood"></span><span id="foodVal">–</span></div>
+      <div class="bar"><div class="fill food" id="foodBar"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label"><span id="lblEnergy"></span><span id="energyVal">–</span></div>
+      <div class="bar"><div class="fill energy" id="energyBar"></div></div>
+    </div>
+
+    <div class="points">
+      <span>🍪 <span id="lblPoints"></span> <em id="lblSince"></em></span>
+      <b id="pointsVal">–</b>
+    </div>
+
+    <div class="actions">
+      <button id="feedBtn" class="btn feed"><span id="lblFeed"></span><small id="feedCost"></small></button>
+      <button id="playBtn" class="btn play"><span id="lblPlay"></span><small id="playCost"></small></button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="todayVal">–</div><div class="stat-cap" id="lblToday"></div></div>
+      <div class="stat"><div class="stat-num" id="totalVal">–</div><div class="stat-cap" id="lblTotal"></div></div>
+      <div class="stat"><div class="stat-num" id="lastVal">–</div><div class="stat-cap" id="lblLast"></div></div>
+    </div>
+
+    <div class="footer"><span id="source">mock</span> · <span id="lblClose"></span></div>
+  </div>
+  <script src="status.js"></script>
+</body>
+</html>

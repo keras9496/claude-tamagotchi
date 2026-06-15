@@ -1,0 +1,41 @@
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+html, body {
+  width: 160px; height: 160px;
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#stage { position: relative; width: 160px; height: 160px; }
+
+/* 픽셀아트는 또렷하게 (보간 끄기) */
+#claw {
+  position: absolute;
+  left: 50%; bottom: 6px;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,.25));
+}
+
+/* ── 말풍선 ─────────────────────────────────────────────── */
+#bubble {
+  position: absolute;
+  left: 50%; top: 2px;
+  transform: translate(-50%, 0);
+  max-width: 150px;
+  padding: 6px 10px;
+  background: #fff;
+  border-radius: 12px;
+  font: 11px/1.3 'Malgun Gothic', sans-serif;
+  color: #333;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  white-space: pre-wrap;
+  z-index: 10;
+}
+#bubble.show { opacity: 1; }
