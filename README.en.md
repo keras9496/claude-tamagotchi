@@ -12,27 +12,34 @@ Claude character. It walks around your desktop; click it to see your current usa
 
 ---
 
-## Prerequisites
+## 🚀 Install — the easy way (just ask Claude Code)
 
-Make sure these are installed first (a version number printed in your terminal means you're good):
+No commands to memorize. **Open Claude Code, then copy-paste the line below and send it** 👇
 
-| Needed | Check | If missing |
-|---|---|---|
-| **Node.js 18+** | `node -v` | Install the LTS from <https://nodejs.org> |
-| **git** | `git --version` | Install from <https://git-scm.com> |
-| **Claude Code** | `claude --version` | Needed only for the skill install (option 1) |
+```text
+Clone https://github.com/keras9496/claude-tamagotchi and install "Claude Pet"
+by following its README, then launch it.
+```
 
-> Works on Windows, macOS, and Linux. Windows examples use PowerShell.
+Claude Code then handles everything: **download → install → register auto-launch → start the pet.**
+In a moment Claw'd appears on your desktop; just pick a **language (한국어 / English) and a name** in the
+first window and you're done. 🎉
+
+**Requirements** — only Node.js 18+ and git. (If you already use Claude Code, you most likely have them.)
+If not, Claude Code will tell you how to install them when you ask. To check yourself: `node -v`, `git --version`.
+
+> To remove it later, tell Claude Code **"uninstall Claude Pet"** and it will disable auto-launch and clean up.
 
 ---
 
-## Installation
+## Other install methods
 
-### ① Easiest — the Claude Code skill (recommended)
+<details>
+<summary>📌 <b>Option B — register the skill</b> (if you install/reinstall often)</summary>
 
-Install the skill once, then just **ask Claude Code** to set everything up.
+&nbsp;
 
-**Step 1. Download the skill file (one time)**
+Download the skill file once, then a simple **"install Claude Pet"** is enough next time.
 
 macOS / Linux:
 ```bash
@@ -49,16 +56,13 @@ Invoke-WebRequest -UseBasicParsing `
   -OutFile "$HOME\.claude\skills\claude-pet\SKILL.md"
 ```
 
-**Step 2. Ask Claude Code**
+Then in Claude Code: **"install Claude Pet"** / `클로드 키우기 설치해줘`.
+</details>
 
-Open Claude Code and say:
+<details>
+<summary>🛠 <b>Option C — manual install</b> (for developers)</summary>
 
-> **"install Claude Pet"**  (or, in Korean, `클로드 키우기 설치해줘`)
-
-The skill then **clones the repo → runs `npm install` → registers auto-launch → starts the pet** for you.
-To remove it, say **"uninstall Claude Pet"** and the skill will walk you through disabling auto-launch.
-
-### ② Manual install
+&nbsp;
 
 ```bash
 git clone https://github.com/keras9496/claude-tamagotchi.git
@@ -67,8 +71,11 @@ npm install
 npm start          # the pet appears on your desktop
 npm run autostart  # (optional) launch automatically with Claude Code
 ```
+</details>
 
-### What happens on first launch
+---
+
+## What happens on first launch
 
 1. A small window asks you to pick a **language (한국어 / English)** and **name** the pet.
 2. Once named, Claw'd walks along the bottom of your screen.
@@ -77,10 +84,9 @@ npm run autostart  # (optional) launch automatically with Claude Code
 
 Your chosen language and name are saved to `~/.claude-pet/pet.json`; all UI text follows that language.
 
-> ⚠️ If the env var `ELECTRON_RUN_AS_NODE=1` is set, Electron runs as plain Node and throws
-> `Cannot read properties of undefined (reading 'handle')`. Unset it first:
-> - macOS/Linux: `unset ELECTRON_RUN_AS_NODE && npm start`
-> - Windows (PowerShell): `Remove-Item Env:ELECTRON_RUN_AS_NODE; npm start`
+> ⚠️ If the app won't start and throws `Cannot read properties of undefined (reading 'handle')`, the env var
+> `ELECTRON_RUN_AS_NODE` is the cause. Unset it and retry:
+> macOS/Linux `unset ELECTRON_RUN_AS_NODE && npm start` · Windows `Remove-Item Env:ELECTRON_RUN_AS_NODE; npm start`
 
 ---
 

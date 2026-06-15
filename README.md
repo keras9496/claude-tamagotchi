@@ -12,27 +12,39 @@
 
 ---
 
-## 준비물
+## 🚀 설치 — 제일 쉬운 방법 (Claude Code 에게 부탁하기)
 
-설치 전에 아래가 깔려 있어야 합니다. (터미널에서 버전이 찍히면 OK)
+명령어를 외울 필요 없습니다. **Claude Code 를 열고, 아래 문장을 복사해서 그대로 붙여넣고 보내기만** 하세요 👇
 
-| 필요한 것 | 확인 명령 | 없으면 |
-|---|---|---|
-| **Node.js 18+** | `node -v` | <https://nodejs.org> 에서 LTS 설치 |
-| **git** | `git --version` | <https://git-scm.com> 에서 설치 |
-| **Claude Code** | `claude --version` | 스킬 설치(아래 1번)를 쓰려면 필요 |
+```text
+https://github.com/keras9496/claude-tamagotchi 이 저장소를 클론해서
+README 안내대로 "클로드 키우기"를 설치하고 실행해줘.
+```
 
-> 윈도우·맥·리눅스 모두 동작합니다. 윈도우는 PowerShell 기준으로 안내합니다.
+이러면 Claude Code 가 알아서 **내려받기 → 설치 → (Claude Code 켤 때) 자동 실행 등록 → 펫 띄우기** 까지 다 해줍니다.
+잠시 뒤 바탕화면에 클로가 나타나고, 처음 뜨는 창에서 **언어(한국어/English)와 이름** 만 정하면 끝이에요. 🎉
+
+> 🇺🇸 영어로 부탁하려면 이 문장을 붙여넣으세요:
+> ```text
+> Clone https://github.com/keras9496/claude-tamagotchi and install "Claude Pet"
+> by following its README, then launch it.
+> ```
+
+**준비물** — Node.js 18+ 와 git 만 있으면 됩니다. (Claude Code 를 쓰고 있다면 보통 이미 깔려 있어요.)
+없더라도 위처럼 부탁하면 Claude Code 가 설치 방법을 알려줍니다. 직접 확인하려면 터미널에서 `node -v`, `git --version`.
+
+> 나중에 지우고 싶으면 Claude Code 에 **"클로드 키우기 삭제해줘"** 라고 하면 자동 실행 해제까지 정리해 줍니다.
 
 ---
 
-## 설치 방법
+## 다른 설치 방법
 
-### ① 가장 쉬운 길 — Claude Code 스킬 (권장)
+<details>
+<summary>📌 <b>방법 B — 스킬로 등록해두기</b> (자주 설치/재설치하는 분)</summary>
 
-스킬을 한 번만 받아두면, 이후엔 Claude Code 에게 **말로** 설치를 시킬 수 있습니다.
+&nbsp;
 
-**1단계. 스킬 파일 내려받기 (최초 1회)**
+스킬 파일을 한 번만 받아두면, 다음부턴 **"클로드 키우기 설치해줘"** 한마디로 됩니다.
 
 macOS / Linux:
 ```bash
@@ -49,26 +61,26 @@ Invoke-WebRequest -UseBasicParsing `
   -OutFile "$HOME\.claude\skills\claude-pet\SKILL.md"
 ```
 
-**2단계. Claude Code 에게 부탁하기**
+그다음 Claude Code 에서 **"클로드 키우기 설치해줘"** / `install Claude Pet`.
+</details>
 
-Claude Code 를 열고 이렇게 말하면 끝입니다:
+<details>
+<summary>🛠 <b>방법 C — 직접 설치</b> (개발자용)</summary>
 
-> **"클로드 키우기 설치해줘"**  (또는 `install Claude Pet`)
-
-그러면 스킬이 알아서 **저장소 클론 → `npm install` → 자동 실행 등록 → 첫 구동**까지 진행합니다.
-삭제하고 싶을 땐 **"클로드 키우기 삭제해줘"** 라고 하면 자동 실행 해제까지 안내합니다.
-
-### ② 직접 설치 (수동)
+&nbsp;
 
 ```bash
 git clone https://github.com/keras9496/claude-tamagotchi.git
 cd claude-tamagotchi
 npm install
-npm start        # 펫이 바탕화면에 등장
+npm start          # 펫이 바탕화면에 등장
 npm run autostart  # (선택) Claude Code 켤 때 자동 실행 등록
 ```
+</details>
 
-### 첫 실행에 일어나는 일
+---
+
+## 첫 실행에 일어나는 일
 
 1. 작은 창이 떠서 **언어(한국어/English)** 를 고르고 **이름**을 지어줍니다.
 2. 이름을 지으면 클로가 바탕화면 아래를 걸어 다닙니다.
@@ -77,10 +89,9 @@ npm run autostart  # (선택) Claude Code 켤 때 자동 실행 등록
 
 선택한 언어와 이름은 `~/.claude-pet/pet.json` 에 저장되고, 이후 모든 문구가 그 언어로 표시됩니다.
 
-> ⚠️ 환경변수 `ELECTRON_RUN_AS_NODE=1` 이 설정돼 있으면 Electron이 일반 Node처럼 실행돼
-> `Cannot read properties of undefined (reading 'handle')` 에러가 납니다. 그 경우 변수를 해제하세요:
-> - macOS/Linux: `unset ELECTRON_RUN_AS_NODE && npm start`
-> - Windows(PowerShell): `Remove-Item Env:ELECTRON_RUN_AS_NODE; npm start`
+> ⚠️ 혹시 실행이 안 되고 `Cannot read properties of undefined (reading 'handle')` 에러가 나면
+> 환경변수 `ELECTRON_RUN_AS_NODE` 때문입니다. 해제 후 다시 실행하세요:
+> macOS/Linux `unset ELECTRON_RUN_AS_NODE && npm start` · Windows `Remove-Item Env:ELECTRON_RUN_AS_NODE; npm start`
 
 ---
 
