@@ -10,6 +10,10 @@ Claude character. It walks around your desktop; click it to see your current usa
 
 > Code a lot and Claude works hard (✨working); neglect it for days and it gets hungry and droopy (🥺hungry).
 
+<p align="center">
+  <img src="assets/hero-en.png" alt="Claude Pet — Claw'd saying 'Spend Claude tokens to raise me!'" width="520" />
+</p>
+
 ---
 
 ## 🚀 Install — the easy way (just ask Claude Code)

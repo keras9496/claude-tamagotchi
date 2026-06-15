@@ -10,6 +10,10 @@
 
 > 개발을 많이 하면 클로드가 열심히 일하고(✨working), 며칠 안 하면 굶어서 축 늘어집니다(🥺hungry).
 
+<p align="center">
+  <img src="assets/hero-ko.png" alt="클로드 키우기 — 클로가 '클로드 토큰을 써서 저를 키워주세요!' 라고 말하는 장면" width="520" />
+</p>
+
 ---
 
 ## 🚀 설치 — 제일 쉬운 방법 (Claude Code 에게 부탁하기)
