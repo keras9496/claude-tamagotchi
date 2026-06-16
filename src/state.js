@@ -63,11 +63,13 @@ function loadSave() {
       happiness: s.happiness ?? 0,
       consumedTokens: s.consumedTokens ?? 0,
       installBaseline: s.installBaseline ?? null, // 설치 시점 누적 토큰 (먹이 포인트 기준선)
+      clickCount: s.clickCount ?? 0,              // 현재 10분 구간의 클릭 수 (대사 단계 결정)
+      clickBucket: s.clickBucket ?? 0,            // 클릭 수를 센 10분 버킷(바뀌면 리셋)
       lastDropISO: s.lastDropISO || nowISO,
       lastTickISO: s.lastTickISO || nowISO,
     };
   } catch {
-    return { name: null, lang: 'ko', food: 70, energy: 70, happiness: 0, consumedTokens: 0, installBaseline: null, lastDropISO: nowISO, lastTickISO: nowISO };
+    return { name: null, lang: 'ko', food: 70, energy: 70, happiness: 0, consumedTokens: 0, installBaseline: null, clickCount: 0, clickBucket: 0, lastDropISO: nowISO, lastTickISO: nowISO };
   }
 }
 
@@ -146,6 +148,13 @@ function pickMessage(mood, seed, lang) {
   return list[Math.abs(Math.floor(seed)) % list.length];
 }
 
+// 누적 클릭 수 → 대사 단계. 초반엔 키워달라는 부탁, 많이 클릭하면 일하라는 핀잔.
+function pickChatter(count, lang) {
+  const c = pack(lang).chatter;
+  const stage = count <= 5 ? c.early : count <= 15 ? c.mid : c.late;
+  return stage[Math.floor(Math.random() * stage.length)];
+}
+
 // 세이브 + 토큰 → GUI 표준 상태
 function build(s, tok) {
   const available = avail(s, tok);
@@ -211,4 +220,16 @@ function setName(name, lang) {
   return { ok: !!clean, ...build(s, tok) };
 }
 
-module.exports = { getState, feed, play, setName };
+// 클릭(쓰다듬기): 클릭 수를 1 올리고 단계에 맞는 대사를 돌려준다.
+// 클릭 수는 10분(DROP_TICK_MS) 버킷마다 리셋 → 한참 만에 다시 만지면 초반 대사부터.
+function talk() {
+  const tok = readTokens();
+  const s = simulate(loadSave(), tok);
+  const bucket = Math.floor(Date.now() / DROP_TICK_MS);
+  if (s.clickBucket !== bucket) { s.clickCount = 0; s.clickBucket = bucket; }
+  s.clickCount = (s.clickCount || 0) + 1;
+  persist(s);
+  return { line: pickChatter(s.clickCount, s.lang), clickCount: s.clickCount };
+}
+
+module.exports = { getState, feed, play, setName, talk };

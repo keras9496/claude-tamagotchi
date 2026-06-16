@@ -35,12 +35,19 @@ const STRINGS = {
       happy:   ['기분 좋아요 ✨', '오늘도 함께해요!', '뭐 도와드릴까요?'],
     },
 
-    // 펫이 스스로 띄우는 단계별 말풍선
+    // 펫이 스스로 띄우는 단계별 말풍선 (상태가 떨어질 때 = 우클릭 안내도 섞임)
     alerts: {
-      food:   { 1: ['출출해요 🍚', '슬슬 배가 고파요', '뭔가 먹고 싶어요'],
-                2: ['배고파요 🥺', '꼬르륵... 밥 주세요', '며칠 굶은 것 같아요'] },
-      energy: { 1: ['심심해요... 놀아줄래요? 🎮', '조금 지루해요', '같이 놀아요'],
-                2: ['기운이 하나도 없어요 😴', '너무 지쳤어요...', '졸려요...'] },
+      food:   { 1: ['출출해요 🍚', '슬슬 배가 고파요', '우클릭해서 밥 주세요 🍚'],
+                2: ['배고파요 🥺', '꼬르륵... 우클릭으로 밥 주세요', '며칠 굶었어요... 우클릭해서 밥 주세요'] },
+      energy: { 1: ['심심해요... 우클릭으로 놀아줄래요? 🎮', '조금 지루해요', '우클릭해서 같이 놀아요'],
+                2: ['기운이 없어요 😴 우클릭해서 놀아주세요', '너무 지쳤어요...', '졸려요... 우클릭으로 놀아주세요'] },
+    },
+
+    // 클릭 수에 따라 변하는 대사 (early→mid→late). 초반엔 조작법 안내도 섞임.
+    chatter: {
+      early: ['밥 주세요! 🍚', 'API로 키워주세요!', '우클릭하면 저에게 밥을 줄 수 있어요 🍚', '우클릭으로 제 상태를 봐주세요 📊', '우클릭해서 저랑 놀아줄래요? 🎮', '저 좀 키워주실래요? 🌱'],
+      mid:   ['같이 코딩해요! 💻', '심심한데 놀아줄래요? 🎮', '우클릭으로 상태를 확인해보세요 📊', '오늘 컨디션 좋아요 ✨', '커밋 자주 해요~'],
+      late:  ['그만 놀고 일에 집중해주세요 😅', '저 신경 쓰지 말고 코드 짜세요!', '딴짓 그만~ 마감 안 급해요? ⏰', '저 여기 잘 있으니 일하세요 🙂', '클릭 그만하고 빌드 돌려요!'],
     },
 
     // 먹이/놀이/이름 반응
@@ -84,10 +91,16 @@ const STRINGS = {
     },
 
     alerts: {
-      food:   { 1: ['Feeling peckish 🍚', 'Getting a bit hungry', 'I could eat something'],
-                2: ["I'm hungry 🥺", 'Rumble... please feed me', 'Feels like days since I ate'] },
-      energy: { 1: ["I'm bored... wanna play? 🎮", 'A little bored', "Let's play"],
-                2: ["I've no energy left 😴", "I'm so worn out...", 'So sleepy...'] },
+      food:   { 1: ['Feeling peckish 🍚', 'Getting a bit hungry', 'Right-click to feed me 🍚'],
+                2: ["I'm hungry 🥺", 'Rumble... right-click to feed me', 'Starving... right-click to feed me'] },
+      energy: { 1: ["I'm bored... right-click to play? 🎮", 'A little bored', 'Right-click to play with me'],
+                2: ["No energy left 😴 right-click to play", "I'm so worn out...", 'So sleepy... right-click to play'] },
+    },
+
+    chatter: {
+      early: ['Feed me! 🍚', 'Raise me with the API!', 'Right-click to feed me 🍚', 'Right-click to check my status 📊', 'Right-click to play with me 🎮', 'Will you raise me? 🌱'],
+      mid:   ["Let's code together! 💻", 'Bored... wanna play? 🎮', 'Right-click to see my status 📊', 'Feeling great today ✨', 'Commit often~'],
+      late:  ['Stop playing, focus on work 😅', "Don't mind me, go write code!", 'Quit slacking~ no deadline? ⏰', "I'm fine here, get to work 🙂", 'Stop clicking, run the build!'],
     },
 
     reactEat: 'Yum yum 😋',

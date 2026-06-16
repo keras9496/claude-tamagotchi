@@ -1,6 +1,6 @@
 const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
-const { getState, feed, play, setName } = require('./state');
+const { getState, feed, play, setName, talk } = require('./state');
 const { writeState } = require('./collector');
 
 const PET_W = 160;
@@ -13,6 +13,7 @@ const NAME_H = 360;
 let petWin = null;
 let statusWin = null;
 let nameWin = null;
+let dragCtl = null; // 드래그 제어 핸들 (startWalking 에서 채움)
 
 // 단일 인스턴스 보장: SessionStart 훅이 매 세션마다 실행돼도 펫은 하나만.
 // (락을 못 잡으면 = 이미 떠 있으면 즉시 종료)
@@ -58,16 +59,55 @@ function startWalking(workArea) {
   const floorY = workArea.y + workArea.height - PET_H;
   const minX = workArea.x;
   const maxX = workArea.x + workArea.width - PET_W;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   let x = petWin.getBounds().x;
-  let dir = 1; // 1=오른쪽, -1=왼쪽
+  let y = floorY;
+  let vy = 0;        // 낙하 속도 (드래그 후 바닥으로 복귀)
+  let dir = 1;       // 1=오른쪽, -1=왼쪽
   let mode = 'walk'; // 'walk' | 'idle'
   let modeTicks = 0;
+  let dragging = false;
+  let dragOffset = { x: 0, y: 0 };
   const SPEED = 2;
+  const GRAVITY = 1.6;
+
+  // 드래그 제어: 렌더러의 mousedown/up → IPC 로 호출된다
+  dragCtl = {
+    start() {
+      const cur = screen.getCursorScreenPoint();
+      const b = petWin.getBounds();
+      dragOffset = { x: cur.x - b.x, y: cur.y - b.y };
+      vy = 0;
+      dragging = true;
+    },
+    end() { dragging = false; }, // 이후 루프에서 바닥으로 낙하
+  };
 
   setInterval(() => {
     if (!petWin || petWin.isDestroyed()) return;
 
+    // 1) 드래그 중: 창을 커서에 붙여 따라다닌다
+    if (dragging) {
+      const cur = screen.getCursorScreenPoint();
+      x = clamp(cur.x - dragOffset.x, minX, maxX);
+      y = clamp(cur.y - dragOffset.y, workArea.y, floorY);
+      petWin.setBounds({ x: Math.round(x), y: Math.round(y), width: PET_W, height: PET_H });
+      petWin.webContents.send('pet-motion', { walking: false, direction: dir });
+      return;
+    }
+
+    // 2) 공중에 있으면 바닥으로 낙하 (놓으면 떨어짐)
+    if (y < floorY) {
+      vy += GRAVITY;
+      y = Math.min(floorY, y + vy);
+      if (y >= floorY) vy = 0;
+      petWin.setBounds({ x: Math.round(x), y: Math.round(y), width: PET_W, height: PET_H });
+      petWin.webContents.send('pet-motion', { walking: false, direction: dir, falling: true });
+      return;
+    }
+
+    // 3) 평소 산책
     modeTicks--;
     if (modeTicks <= 0) {
       // 가끔 멈춰 쉬거나 방향을 바꾼다
@@ -169,7 +209,10 @@ function toggleStatusWindow() {
 
 // ── IPC ───────────────────────────────────────────────────────────────
 ipcMain.handle('get-state', () => getState());
-ipcMain.on('pet-clicked', () => toggleStatusWindow());
+ipcMain.on('pet-open-status', () => toggleStatusWindow());
+ipcMain.handle('pet-talk', () => talk());
+ipcMain.on('pet-drag-start', () => { if (dragCtl) dragCtl.start(); });
+ipcMain.on('pet-drag-end', () => { if (dragCtl) dragCtl.end(); });
 
 function reactOnPet(type) {
   if (petWin && !petWin.isDestroyed()) petWin.webContents.send('pet-react', { type });
