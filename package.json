@@ -1,6 +1,6 @@
 {
   "name": "claude-pet",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "클로드 키우기 — 클로드 코드 토큰 사용량으로 키우는 데스크톱 펫",
   "main": "src/main.js",
   "scripts": {

@@ -110,9 +110,20 @@ npm run autostart:off      # remove
 
 ## Interaction
 
-- **Click the character** → speech bubble + status panel (happiness / food / energy / feed points / today / total tokens).
-- The status panel closes when you click elsewhere.
-- **When it gets needy it speaks up on its own** — low food: *peckish → hungry*; low energy: *bored → no energy left*. (Goes quiet once recovered.)
+- **Single left-click** → Claw'd says a line and makes a face. The line changes with how often you pet it (*feed me → let's code → stop playing, get to work*, **resets every 10 min**), and the expression is random (heart eyes · X eyes · surprised · wink · munch).
+- **Left-click drag** → move Claw'd anywhere. Let go and it **falls to the floor under gravity** with a surprised face.
+- **Double-click or right-click** → toggle the status panel (happiness / food / energy / feed points / today / total tokens). Closes when you click elsewhere.
+- **When it gets needy it speaks up on its own** — low food: *peckish → hungry*; low energy: *bored → no energy left* — with a hint to **right-click to feed/play**. (Goes quiet once recovered.)
+
+## Version
+
+**v0.2.0** — big interaction update
+- Left-click drag to move + gravity fall on release (surprised face mid-fall)
+- Click-count-based dynamic lines (resets every 10 min) + right-click control hints
+- Random expressions on click/fall (heart eyes · X eyes · surprised · wink · munch)
+- Split interaction: single-click = talk, double/right-click = status panel
+
+Previously: **v0.1.0** — first release (walking · status panel · feed/play · i18n · auto-launch).
 
 ## Project layout
 
@@ -121,14 +132,14 @@ claude-tamagotchi/
 ├── skills/
 │   └── claude-pet/SKILL.md   Claude Code install skill (for distribution)
 ├── src/
-│   ├── main.js      Electron main: pet window · walking · status · name window · single-instance · IPC
+│   ├── main.js      Electron main: pet window · walk/drag·fall · status · name window · single-instance · IPC
 │   ├── collector.js aggregates ~/.claude/projects/**/*.jsonl → state.json (every 60s)
 │   ├── state.js     game state: food/energy decay · feed points · feed()/play()/setName()
 │   ├── i18n.js      ko/en string table — single source for all user-facing text
 │   ├── launch.js    detached launcher (called by the SessionStart hook)
 │   ├── install.js   auto-launch hook register/unregister (npm run autostart)
 │   ├── preload.js   renderer ↔ main bridge (+ exposes the string table)
-│   ├── pet.*        Claw'd pixel sprite window (walk / mood / eat reactions)
+│   ├── pet.*        Claw'd pixel sprite window (walk · mood · expressions · drag · eat reactions)
 │   ├── name.*       first-run language picker + naming window
 │   └── status.*     status & interaction panel (gauges + feed/play buttons)
 ├── package.json
