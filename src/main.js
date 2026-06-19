@@ -6,13 +6,17 @@ const { writeState } = require('./collector');
 const PET_W = 160;
 const PET_H = 160;
 const STATUS_W = 300;
-const STATUS_H = 540;
+const STATUS_H = 584;
 const NAME_W = 300;
 const NAME_H = 360;
+const MINI_W = 200;
+const MINI_H = 96;
 
 let petWin = null;
 let statusWin = null;
 let nameWin = null;
+let miniWin = null;       // '넣어두기' 시 뜨는 미니 독
+let petHidden = false;    // 펫이 넣어둔 상태인지 (걷기 루프를 멈춤)
 let dragCtl = null; // 드래그 제어 핸들 (startWalking 에서 채움)
 
 // 단일 인스턴스 보장: SessionStart 훅이 매 세션마다 실행돼도 펫은 하나만.
@@ -86,6 +90,7 @@ function startWalking(workArea) {
 
   setInterval(() => {
     if (!petWin || petWin.isDestroyed()) return;
+    if (petHidden) return; // 넣어둔 상태면 움직이지 않는다
 
     // 1) 드래그 중: 창을 커서에 붙여 따라다닌다
     if (dragging) {
@@ -207,12 +212,66 @@ function toggleStatusWindow() {
   });
 }
 
+// ── 넣어두기 / 꺼내기 (미니 독) ────────────────────────────────────────
+function createMiniWindow() {
+  if (miniWin && !miniWin.isDestroyed()) { miniWin.focus(); return; }
+  const { workArea } = screen.getPrimaryDisplay();
+  // 펫이 있던 자리 근처(없으면 우하단)에 띄운다
+  const petB = petWin && !petWin.isDestroyed() ? petWin.getBounds() : null;
+  let x = petB ? petB.x + PET_W / 2 - MINI_W / 2 : workArea.x + workArea.width - MINI_W - 20;
+  x = Math.max(workArea.x, Math.min(x, workArea.x + workArea.width - MINI_W));
+  const y = workArea.y + workArea.height - MINI_H - 8;
+
+  miniWin = new BrowserWindow({
+    width: MINI_W,
+    height: MINI_H,
+    x: Math.round(x),
+    y,
+    show: false,
+    transparent: true,
+    backgroundColor: '#00000000',
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    hasShadow: false,
+    paintWhenInitiallyHidden: true,
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), sandbox: false },
+  });
+  miniWin.once('ready-to-show', () => miniWin.show());
+  miniWin.loadFile(path.join(__dirname, 'mini.html'));
+}
+
+function hidePet() {
+  if (statusWin && !statusWin.isDestroyed()) { statusWin.close(); statusWin = null; }
+  petHidden = true;
+  if (petWin && !petWin.isDestroyed()) petWin.hide();
+  createMiniWindow();
+}
+
+function showPet() {
+  if (miniWin && !miniWin.isDestroyed()) { miniWin.close(); miniWin = null; }
+  petHidden = false;
+  if (petWin && !petWin.isDestroyed()) petWin.show();
+}
+
 // ── IPC ───────────────────────────────────────────────────────────────
 ipcMain.handle('get-state', () => getState());
 ipcMain.on('pet-open-status', () => toggleStatusWindow());
 ipcMain.handle('pet-talk', () => talk());
 ipcMain.on('pet-drag-start', () => { if (dragCtl) dragCtl.start(); });
 ipcMain.on('pet-drag-end', () => { if (dragCtl) dragCtl.end(); });
+
+// 펫 재시작: 앱을 종료하고 즉시 새 인스턴스를 띄운다(코드 변경 반영용).
+// exit(0)로 단일 인스턴스 락을 먼저 풀어줘야 새 인스턴스가 락을 잡는다.
+ipcMain.on('pet-restart', () => {
+  app.relaunch();
+  app.exit(0);
+});
+
+// 넣어두기(상태창) / 꺼내기(미니 독)
+ipcMain.on('pet-hide', () => hidePet());
+ipcMain.on('pet-show', () => showPet());
 
 function reactOnPet(type) {
   if (petWin && !petWin.isDestroyed()) petWin.webContents.send('pet-react', { type });

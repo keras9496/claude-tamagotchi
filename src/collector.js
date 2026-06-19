@@ -1,5 +1,6 @@
 // 수집기: ~/.claude/projects/**/*.jsonl 의 토큰 사용량을 집계해
 // ~/.claude-pet/state.json 으로 써준다. 펫 GUI는 이 파일만 읽으면 된다.
+// 집계 대상은 '새로 생성된 토큰'(출력+입력+캐시 쓰기). cache_read는 제외한다.
 //
 // electron 의존성이 전혀 없어서 `node src/collector.js` 로 단독 실행/테스트 가능.
 
@@ -55,7 +56,11 @@ function aggregateFile(file) {
     const ts = obj.timestamp;
     if (!usage || !ts) continue;
 
-    const out = usage.output_tokens || 0;
+    // 새로 생성된 토큰만 센다: 출력 + 입력 + 캐시 쓰기.
+    // cache_read(같은 맥락 반복 읽기)는 개수가 압도적이라 빼야 개수·요금 둘 다 균형이 맞는다.
+    const out = (usage.output_tokens || 0)
+              + (usage.input_tokens || 0)
+              + (usage.cache_creation_input_tokens || 0);
     const tms = Date.parse(ts);
     if (Number.isNaN(tms)) continue;
 

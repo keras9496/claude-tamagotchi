@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld('petAPI', {
   getState: () => ipcRenderer.invoke('get-state'),
   feed: () => ipcRenderer.invoke('feed'),
   play: () => ipcRenderer.invoke('play'),
+  restart: () => ipcRenderer.send('pet-restart'), // 상태창/미니독: 펫 재시작
+  hide: () => ipcRenderer.send('pet-hide'),       // 상태창: 펫 넣어두기
+  show: () => ipcRenderer.send('pet-show'),       // 미니독: 펫 꺼내기
   // 이름 짓기 창
   setName: (name, lang) => ipcRenderer.invoke('set-name', name, lang),
   // 다국어 문자열 테이블 (렌더러가 lang 으로 골라 씀)

@@ -16,6 +16,9 @@ const STRINGS = {
     total: '누적 토큰',
     lastActive: '마지막 활동',
     closeHint: '바깥을 클릭하면 닫힘',
+    restartBtn: '재시작',
+    hideBtn: '넣어두기',
+    showBtn: '꺼내기',
 
     // 경과 시간
     justNow: '방금',
@@ -74,6 +77,9 @@ const STRINGS = {
     total: 'Total tokens',
     lastActive: 'Last active',
     closeHint: 'click outside to close',
+    restartBtn: 'Restart',
+    hideBtn: 'Tuck away',
+    showBtn: 'Bring out',
 
     justNow: 'just now',
     minAgo: 'm ago',
