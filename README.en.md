@@ -114,8 +114,14 @@ npm run autostart:off      # remove
 - **Left-click drag** → move Claw'd anywhere. Let go and it **falls to the floor under gravity** with a surprised face.
 - **Double-click or right-click** → toggle the status panel (happiness / food / energy / feed points / today / total tokens). Closes when you click elsewhere.
 - **When it gets needy it speaks up on its own** — low food: *peckish → hungry*; low energy: *bored → no energy left* — with a hint to **right-click to feed/play**. (Goes quiet once recovered.)
+- **Status panel footer buttons** — 🙈 **Tuck away** (hide the pet for a bit) · 🔄 **Restart** (apply code changes). When tucked away, a small **mini dock** appears so you can 🐾 **Bring out** the pet again, and the mini dock can be **dragged anywhere** by its body.
 
 ## Version
+
+**v0.3.0** — window management & token tally fix
+- **Tuck away / bring out**: hiding the pet pops a **mini dock** (draggable) to bring it back
+- **Restart**: relaunch the pet from the status panel to apply code changes (state is preserved)
+- **Token tally fix**: `output` only → `output + input + cache_creation` (excludes cache_read) for a truer usage feel
 
 **v0.2.0** — big interaction update
 - Left-click drag to move + gravity fall on release (surprised face mid-fall)
@@ -123,7 +129,7 @@ npm run autostart:off      # remove
 - Random expressions on click/fall (heart eyes · X eyes · surprised · wink · munch)
 - Split interaction: single-click = talk, double/right-click = status panel
 
-Previously: **v0.1.0** — first release (walking · status panel · feed/play · i18n · auto-launch).
+**v0.1.0** — first release (walking · status panel · feed/play · i18n · auto-launch).
 
 ## Project layout
 
@@ -132,8 +138,8 @@ claude-tamagotchi/
 ├── skills/
 │   └── claude-pet/SKILL.md   Claude Code install skill (for distribution)
 ├── src/
-│   ├── main.js      Electron main: pet window · walk/drag·fall · status · name window · single-instance · IPC
-│   ├── collector.js aggregates ~/.claude/projects/**/*.jsonl → state.json (every 60s)
+│   ├── main.js      Electron main: pet window · walk/drag·fall · status · name window · mini dock · single-instance · IPC
+│   ├── collector.js aggregates ~/.claude/projects/**/*.jsonl (output+input+cache_creation) → state.json (every 60s)
 │   ├── state.js     game state: food/energy decay · feed points · feed()/play()/setName()
 │   ├── i18n.js      ko/en string table — single source for all user-facing text
 │   ├── launch.js    detached launcher (called by the SessionStart hook)
@@ -141,7 +147,8 @@ claude-tamagotchi/
 │   ├── preload.js   renderer ↔ main bridge (+ exposes the string table)
 │   ├── pet.*        Claw'd pixel sprite window (walk · mood · expressions · drag · eat reactions)
 │   ├── name.*       first-run language picker + naming window
-│   └── status.*     status & interaction panel (gauges + feed/play buttons)
+│   ├── status.*     status & interaction panel (gauges + feed/play + tuck-away/restart)
+│   └── mini.*       mini dock shown when tucked away (bring-out/restart · draggable)
 ├── package.json
 ├── LICENSE
 └── README.md
