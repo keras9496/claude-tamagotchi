@@ -118,6 +118,10 @@ npm run autostart:off      # remove
 
 ## Version
 
+**v0.3.1** — feed-point bug fix
+- **Fixed feed points stuck at 0**: the cumulative `tokensTotal` can shrink when Claude Code prunes old session logs, so the old `(current total − total at install)` formula stayed at 0 forever once the total dropped below the install baseline. Now only the **positive delta** is accrued on each observation, so earned points survive log pruning.
+- Existing saves are **auto-migrated** on first launch (keeps prior earnings when healthy, restores today's tokens when the baseline was broken).
+
 **v0.3.0** — window management & token tally fix
 - **Tuck away / bring out**: hiding the pet pops a **mini dock** (draggable) to bring it back
 - **Restart**: relaunch the pet from the status panel to apply code changes (state is preserved)
@@ -169,7 +173,7 @@ claude-tamagotchi/
 ~/.claude-pet/pet.json     ← game save (name / lang / food / energy / happiness …)
 ```
 
-- **Feed points** = `(current total − total at install) − spent`. Only post-install usage counts, starting from 0.
+- **Feed points** = `earned tokens − spent`. Earned tokens accrue only the **increase** in the cumulative total (post-install usage, starting from 0). Since the total can shrink when old session logs are pruned, only positive deltas are added so earnings don't drop.
 - **Feed / Play** spend feed points (30K tokens each by default) to refill food/energy.
 - **Every 10 minutes** one of food/energy randomly drops (−12).
 - **No need to keep it running**: time spent while the app was closed is caught up on next launch by comparing
