@@ -62,14 +62,16 @@ function loadSave() {
       energy: s.energy ?? 70,
       happiness: s.happiness ?? 0,
       consumedTokens: s.consumedTokens ?? 0,
-      installBaseline: s.installBaseline ?? null, // 설치 시점 누적 토큰 (먹이 포인트 기준선)
+      installBaseline: s.installBaseline ?? null, // 설치 시점 누적 토큰 (구버전 호환/마이그레이션용)
+      earnedTokens: s.earnedTokens ?? 0,          // 설치 후 적립한 토큰(단조 증가, 로그 정리에도 안 줄어듦)
+      lastSeenTotal: s.lastSeenTotal ?? null,     // 마지막으로 관측한 tokensTotal (델타 계산 기준)
       clickCount: s.clickCount ?? 0,              // 현재 10분 구간의 클릭 수 (대사 단계 결정)
       clickBucket: s.clickBucket ?? 0,            // 클릭 수를 센 10분 버킷(바뀌면 리셋)
       lastDropISO: s.lastDropISO || nowISO,
       lastTickISO: s.lastTickISO || nowISO,
     };
   } catch {
-    return { name: null, lang: 'ko', food: 70, energy: 70, happiness: 0, consumedTokens: 0, installBaseline: null, clickCount: 0, clickBucket: 0, lastDropISO: nowISO, lastTickISO: nowISO };
+    return { name: null, lang: 'ko', food: 70, energy: 70, happiness: 0, consumedTokens: 0, installBaseline: null, earnedTokens: 0, lastSeenTotal: null, clickCount: 0, clickBucket: 0, lastDropISO: nowISO, lastTickISO: nowISO };
   }
 }
 
@@ -100,14 +102,42 @@ function initialHappiness(tokensTotal) {
   return clamp((tokensTotal / TOKENS_FOR_INIT_MAX) * HAPPY_INIT_MAX, 0, HAPPY_INIT_MAX);
 }
 
-// 설치 후 사용량 - 소비량 = 먹이 포인트
-function avail(s, tok) {
-  const base = s.installBaseline == null ? tok.tokensTotal : s.installBaseline;
-  return Math.max(0, (tok.tokensTotal - base) - s.consumedTokens);
+// 토큰 적립: tokensTotal 의 '증가분'만 누적한다.
+// collector 의 tokensTotal 은 Claude Code 가 오래된 세션 로그를 정리하면 줄어들 수 있어
+// 단조 증가가 아니다. 그래서 (현재합 - 설치기준선) 방식은 합이 기준선 밑으로 내려가면
+// 영원히 0이 되는 버그가 있었다. 대신 관측될 때마다 양(+)의 델타만 적립하면
+// 로그가 정리돼도 적립분이 보존된다.
+function accrue(s, tok) {
+  if (s.lastSeenTotal == null) {
+    // 최초 적립 초기화.
+    if (s.installBaseline != null) {
+      // 구버전(installBaseline 방식) 세이브 마이그레이션.
+      // 정상 상태면 legacy = 설치 후 벌어둔 양. 로그 정리로 합이 기준선 밑이면 legacy=0 이라
+      // 최소한 '오늘 생성분'은 살려준다. consumedTokens 를 더해 두면 avail 이 그만큼 복원된다.
+      const legacy = Math.max(0, tok.tokensTotal - s.installBaseline);
+      s.earnedTokens = s.consumedTokens + Math.max(legacy, tok.tokensToday || 0);
+    } else {
+      s.earnedTokens = s.earnedTokens || 0;
+    }
+    s.lastSeenTotal = tok.tokensTotal;
+    return;
+  }
+  const delta = tok.tokensTotal - s.lastSeenTotal;
+  if (delta > 0) s.earnedTokens = (s.earnedTokens || 0) + delta;
+  // delta < 0 (로그 정리로 합 감소): 적립 유지, 관측 기준만 갱신
+  s.lastSeenTotal = tok.tokensTotal;
+}
+
+// 적립 - 소비 = 먹이 포인트
+function avail(s) {
+  return Math.max(0, (s.earnedTokens || 0) - s.consumedTokens);
 }
 
 // 경과 시간 시뮬레이션: 10분 틱마다 랜덤 하락 + 행복도(돌봄 + 누적토큰 바닥)
 function simulate(s, tok) {
+  // 토큰 적립(설치 후 증가분 누적). 첫 실행/구버전 마이그레이션도 여기서 처리.
+  accrue(s, tok);
+
   // 설치(첫 실행) 시점 1회: 기준선 + 누적 토큰 기반 초기 행복도 고정.
   // 이후로는 누적 토큰이 행복도에 직접 관여하지 않는다(순수 돌봄).
   if (s.installBaseline == null) {
@@ -157,7 +187,7 @@ function pickChatter(count, lang) {
 
 // 세이브 + 토큰 → GUI 표준 상태
 function build(s, tok) {
-  const available = avail(s, tok);
+  const available = avail(s);
   const mood = deriveMood(s.food, s.energy, tok.tokensToday);
   return {
     name: s.name || "Claw'd", // 이름 미설정이면 기본값
@@ -192,7 +222,7 @@ function getState() {
 function feed() {
   const tok = readTokens();
   const s = simulate(loadSave(), tok);
-  if (avail(s, tok) < FEED_COST) { persist(s); return { ok: false, reason: 'no_points', ...build(s, tok) }; }
+  if (avail(s) < FEED_COST) { persist(s); return { ok: false, reason: 'no_points', ...build(s, tok) }; }
   s.consumedTokens += FEED_COST;
   s.food = clamp(s.food + FEED_GAIN, 0, MAX);
   persist(s);
@@ -202,7 +232,7 @@ function feed() {
 function play() {
   const tok = readTokens();
   const s = simulate(loadSave(), tok);
-  if (avail(s, tok) < PLAY_COST) { persist(s); return { ok: false, reason: 'no_points', ...build(s, tok) }; }
+  if (avail(s) < PLAY_COST) { persist(s); return { ok: false, reason: 'no_points', ...build(s, tok) }; }
   s.consumedTokens += PLAY_COST;
   s.energy = clamp(s.energy + PLAY_GAIN, 0, MAX);
   persist(s);
