@@ -114,9 +114,15 @@ npm run autostart:off      # remove
 - **Left-click drag** → move Claw'd anywhere. Let go and it **falls to the floor under gravity** with a surprised face.
 - **Double-click or right-click** → toggle the status panel (happiness / food / energy / feed points / today / total tokens). Closes when you click elsewhere.
 - **When it gets needy it speaks up on its own** — low food: *peckish → hungry*; low energy: *bored → no energy left* — with a hint to **right-click to feed/play**. (Goes quiet once recovered.)
-- **Status panel footer buttons** — 🙈 **Tuck away** (hide the pet for a bit) · 🔄 **Restart** (apply code changes). When tucked away, a small **mini dock** appears so you can 🐾 **Bring out** the pet again, and the mini dock can be **dragged anywhere** by its body.
+- **Status panel footer buttons** — 🙈 **Tuck away** (hide the pet for a bit) · 👋 **Quit** (save state and fully close the app). When tucked away, a small **mini dock** appears so you can 🐾 **Bring out** the pet again, and the mini dock can be **dragged anywhere** by its body.
+- **No worries while it's off** — while the app is closed, Claude **feeds and plays by itself using your saved feed points**. On the next launch it appears recovered and reports: *"While you were away, I used saved tokens — N meals · N playtimes!"* (Once points run out, it starves as usual.)
 
 ## Version
+
+**v0.4.0** — offline auto-care & quit button
+- **Offline auto-care**: time spent while the app was closed is replayed in 10-minute ticks, with Claude **feeding/playing by itself from saved feed points**. Happiness genuinely rises for the stretches food & energy stayed full, and a speech bubble reports the care on next launch. (Falls back to normal decay once points run out.)
+- **Quit button**: 👋 **Quit** replaces Restart in the status panel and mini dock — close the app with a button instead of force-killing it. State is saved right before quitting, anchoring the next offline calculation.
+- **Heartbeat save**: game state is persisted every 60s, so even a force-kill leaves at most ~1 minute of offline-window error.
 
 **v0.3.1** — feed-point bug fix
 - **Fixed feed points stuck at 0**: the cumulative `tokensTotal` can shrink when Claude Code prunes old session logs, so the old `(current total − total at install)` formula stayed at 0 forever once the total dropped below the install baseline. Now only the **positive delta** is accrued on each observation, so earned points survive log pruning.
@@ -144,15 +150,15 @@ claude-tamagotchi/
 ├── src/
 │   ├── main.js      Electron main: pet window · walk/drag·fall · status · name window · mini dock · single-instance · IPC
 │   ├── collector.js aggregates ~/.claude/projects/**/*.jsonl (output+input+cache_creation) → state.json (every 60s)
-│   ├── state.js     game state: food/energy decay · feed points · feed()/play()/setName()
+│   ├── state.js     game state: food/energy decay · feed points · offline auto-care · feed()/play()/setName()
 │   ├── i18n.js      ko/en string table — single source for all user-facing text
 │   ├── launch.js    detached launcher (called by the SessionStart hook)
 │   ├── install.js   auto-launch hook register/unregister (npm run autostart)
 │   ├── preload.js   renderer ↔ main bridge (+ exposes the string table)
 │   ├── pet.*        Claw'd pixel sprite window (walk · mood · expressions · drag · eat reactions)
 │   ├── name.*       first-run language picker + naming window
-│   ├── status.*     status & interaction panel (gauges + feed/play + tuck-away/restart)
-│   └── mini.*       mini dock shown when tucked away (bring-out/restart · draggable)
+│   ├── status.*     status & interaction panel (gauges + feed/play + tuck-away/quit)
+│   └── mini.*       mini dock shown when tucked away (bring-out/quit · draggable)
 ├── package.json
 ├── LICENSE
 └── README.md
@@ -176,8 +182,9 @@ claude-tamagotchi/
 - **Feed points** = `earned tokens − spent`. Earned tokens accrue only the **increase** in the cumulative total (post-install usage, starting from 0). Since the total can shrink when old session logs are pruned, only positive deltas are added so earnings don't drop.
 - **Feed / Play** spend feed points (30K tokens each by default) to refill food/energy.
 - **Every 10 minutes** one of food/energy randomly drops (−12).
-- **No need to keep it running**: time spent while the app was closed is caught up on next launch by comparing
-  `lastDropISO`/`lastTickISO` (last run) with the current time — applied all at once.
+- **No need to keep it running**: on launch, the time since `lastTickISO` (refreshed every 60s while running) is
+  **replayed in 10-minute ticks** — each tick integrates happiness, applies the random drop, then auto-cares
+  (same 30K cost / +28 recovery as manual feed/play) from saved feed points. Once points run out, normal decay resumes.
 - **Happiness (0→100)**
   - Set **once at install** from cumulative tokens (80 at 10M). That's the only effect of past usage.
   - After that it's **pure care**: when food & energy are **both full** it rises +12/h (→100); when **both ≤50** it falls (→0 over 48h of neglect).
