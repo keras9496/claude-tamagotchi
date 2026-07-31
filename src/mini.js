@@ -7,11 +7,11 @@ async function init() {
     $('petName').textContent = s.name;
     const t = window.petAPI.strings[s.lang] || window.petAPI.strings.ko;
     $('lblShow').textContent = t.showBtn;
-    $('lblRestart').textContent = t.restartBtn;
+    $('lblQuit').textContent = t.quitBtn;
   } catch (_) {}
 }
 
 $('showBtn').addEventListener('click', () => window.petAPI.show());
-$('restartBtn').addEventListener('click', () => window.petAPI.restart());
+$('quitBtn').addEventListener('click', () => window.petAPI.quit());
 
 init();

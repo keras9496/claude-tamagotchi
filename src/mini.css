@@ -36,8 +36,8 @@ body {
   transition: filter .15s, transform .1s;
   -webkit-app-region: no-drag; /* 버튼은 드래그 제외 → 클릭 가능 */
 }
-.mbtn.show    { background: linear-gradient(135deg, #e58a5f, #d97757); }
-.mbtn.restart {
+.mbtn.show { background: linear-gradient(135deg, #e58a5f, #d97757); }
+.mbtn.quit {
   background: rgba(217,119,87,.1); color: #c2613f;
   border: 1px solid rgba(217,119,87,.3);
 }

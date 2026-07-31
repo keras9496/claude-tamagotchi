@@ -16,7 +16,7 @@ const STRINGS = {
     total: '누적 토큰',
     lastActive: '마지막 활동',
     closeHint: '바깥을 클릭하면 닫힘',
-    restartBtn: '재시작',
+    quitBtn: '종료',
     hideBtn: '넣어두기',
     showBtn: '꺼내기',
 
@@ -58,6 +58,9 @@ const STRINGS = {
     reactPlay: '신난다! 🎉',
     reactNamed: '난 이제 {name}! 🌱',
 
+    // 부팅 시: 꺼져 있는 동안 클로드가 자동으로 돌봐준 결과 보고
+    autoCare: '자리 비운 사이 모아둔 토큰으로 밥 {fed}번 · 놀이 {play}번 챙겼어요! ✨',
+
     // 이름 짓기 창
     nameTitle: '새 친구가 찾아왔어요!',
     nameDesc: "이 클로(Claw'd)의 <b>이름</b>을 지어주세요.<br />앞으로 이 이름으로 함께해요.",
@@ -77,7 +80,7 @@ const STRINGS = {
     total: 'Total tokens',
     lastActive: 'Last active',
     closeHint: 'click outside to close',
-    restartBtn: 'Restart',
+    quitBtn: 'Quit',
     hideBtn: 'Tuck away',
     showBtn: 'Bring out',
 
@@ -112,6 +115,8 @@ const STRINGS = {
     reactEat: 'Yum yum 😋',
     reactPlay: 'So fun! 🎉',
     reactNamed: "I'm {name} now! 🌱",
+
+    autoCare: 'While you were away, I used saved tokens — {fed} meals · {play} playtimes! ✨',
 
     nameTitle: 'A new friend appeared!',
     nameDesc: "Give this <b>Claw'd</b> a name.<br />You'll raise it together from now on.",

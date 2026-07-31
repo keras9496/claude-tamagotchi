@@ -28,7 +28,7 @@ function applyLabels(t) {
   $('lblTotal').textContent = t.total;
   $('lblLast').textContent = t.lastActive;
   $('lblClose').textContent = t.closeHint;
-  $('lblRestart').textContent = t.restartBtn;
+  $('lblQuit').textContent = t.quitBtn;
   $('lblHide').textContent = t.hideBtn;
 }
 
@@ -78,8 +78,8 @@ $('playBtn').addEventListener('click', async () => {
   apply(r);
 });
 
-// 재시작: 앱을 껐다 켜 코드 변경을 반영한다(펫 상태는 pet.json에 보존됨).
-$('restartBtn').addEventListener('click', () => window.petAPI.restart());
+// 종료: 상태를 저장하고 앱을 완전히 끈다(펫 상태는 pet.json에 보존됨).
+$('quitBtn').addEventListener('click', () => window.petAPI.quit());
 // 넣어두기: 펫을 숨기고 미니 독을 띄운다.
 $('hideBtn').addEventListener('click', () => window.petAPI.hide());
 

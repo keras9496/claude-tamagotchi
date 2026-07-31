@@ -7,13 +7,14 @@ contextBridge.exposeInMainWorld('petAPI', {
   onReact: (cb) => ipcRenderer.on('pet-react', (_e, data) => cb(data)),
   talk: () => ipcRenderer.invoke('pet-talk'),         // 단일 클릭: 대사
   openStatus: () => ipcRenderer.send('pet-open-status'), // 더블클릭/우클릭: 상태창
+  takeCareReport: () => ipcRenderer.invoke('take-care-report'), // 부팅 시 자동 돌봄 결과 1회 조회
   dragStart: () => ipcRenderer.send('pet-drag-start'),
   dragEnd: () => ipcRenderer.send('pet-drag-end'),
   // 공용 / 상태창
   getState: () => ipcRenderer.invoke('get-state'),
   feed: () => ipcRenderer.invoke('feed'),
   play: () => ipcRenderer.invoke('play'),
-  restart: () => ipcRenderer.send('pet-restart'), // 상태창/미니독: 펫 재시작
+  quit: () => ipcRenderer.send('pet-quit'),       // 상태창/미니독: 펫 종료
   hide: () => ipcRenderer.send('pet-hide'),       // 상태창: 펫 넣어두기
   show: () => ipcRenderer.send('pet-show'),       // 미니독: 펫 꺼내기
   // 이름 짓기 창

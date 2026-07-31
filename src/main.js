@@ -1,6 +1,6 @@
 const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
-const { getState, feed, play, setName, talk } = require('./state');
+const { getState, feed, play, setName, talk, takeCareReport } = require('./state');
 const { writeState } = require('./collector');
 
 const PET_W = 160;
@@ -259,14 +259,15 @@ function showPet() {
 ipcMain.handle('get-state', () => getState());
 ipcMain.on('pet-open-status', () => toggleStatusWindow());
 ipcMain.handle('pet-talk', () => talk());
+ipcMain.handle('take-care-report', () => takeCareReport());
 ipcMain.on('pet-drag-start', () => { if (dragCtl) dragCtl.start(); });
 ipcMain.on('pet-drag-end', () => { if (dragCtl) dragCtl.end(); });
 
-// 펫 재시작: 앱을 종료하고 즉시 새 인스턴스를 띄운다(코드 변경 반영용).
-// exit(0)로 단일 인스턴스 락을 먼저 풀어줘야 새 인스턴스가 락을 잡는다.
-ipcMain.on('pet-restart', () => {
-  app.relaunch();
-  app.exit(0);
+// 종료: 최신 상태를 저장하고 앱을 완전히 끈다(작업 관리자 강제 종료 불필요).
+// 여기서 저장된 lastTickISO 가 다음 부팅 때 '꺼져 있던 시간' 계산의 기준이 된다.
+ipcMain.on('pet-quit', () => {
+  try { getState(); } catch (_) {}
+  app.quit();
 });
 
 // 넣어두기(상태창) / 꺼내기(미니 독)
@@ -295,11 +296,18 @@ ipcMain.handle('set-name', (_e, name, lang) => {
   return r;
 });
 
-// 수집기를 주기적으로 돌려 state.json 갱신 (시작 시 1회 + 60초마다)
+// 수집기 + 하트비트 (시작 시 1회 + 60초마다):
+//  1) writeState — 세션 로그 집계 → state.json 갱신
+//  2) getState  — 게임 상태 시뮬레이션 + pet.json 저장
+// 시작 직후의 getState 가 '꺼져 있던 시간'의 자동 돌봄을 트리거하고(그 직전
+// writeState 로 꺼진 동안 쌓인 토큰이 반영됨), 이후 매분 갱신되는 lastTickISO
+// 덕분에 강제 종료돼도 오프라인 구간이 최대 1분 오차로 계산된다.
 function startCollector() {
   const tick = () => {
     try { writeState(); }
     catch (e) { console.error('[collector]', e.message); }
+    try { getState(); }
+    catch (e) { console.error('[state]', e.message); }
   };
   tick();
   setInterval(tick, 60000);

@@ -106,6 +106,17 @@ async function refreshState() {
 setTimeout(refreshState, 1500);
 setInterval(refreshState, 3000);
 
+// 부팅 직후 1회: 꺼져 있던 동안의 자동 돌봄(밥/놀이) 결과를 말풍선으로 보고.
+// 첫 refreshState(1.5초) 이후에 띄워야 strings 가 저장된 언어로 맞춰져 있다.
+setTimeout(async () => {
+  try {
+    const r = await window.petAPI.takeCareReport();
+    if (r && (r.fed || r.played)) {
+      showBubble(strings.autoCare.replace('{fed}', r.fed).replace('{play}', r.played));
+    }
+  } catch (_) {}
+}, 2200);
+
 function px(c, r, color) {
   ctx.fillStyle = color;
   ctx.fillRect(c * SCALE, r * SCALE, SCALE, SCALE);

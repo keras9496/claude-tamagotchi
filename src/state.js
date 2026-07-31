@@ -133,6 +133,27 @@ function avail(s) {
   return Math.max(0, (s.earnedTokens || 0) - s.consumedTokens);
 }
 
+// ── 오프라인 자동 돌봄 ────────────────────────────────────
+// 앱이 꺼져 있던 동안엔 클로드가 쌓아둔 먹이 포인트로 스스로 밥/놀이를
+// 챙겼다고 간주한다. 프로세스 시작 후 첫 simulate 의 경과분에만 적용.
+let bootCatchUp = true;
+let careReport = null; // { fed, played } — 펫 창이 한 번 가져가면 비움
+
+// 한 틱 분량의 자동 돌봄: 가득(FULL_AT) 아래로 내려간 스탯을 포인트로 채운다.
+// 수동 밥/놀이와 같은 비용·회복량을 쓰므로 밸런스가 따로 놀지 않는다.
+function autoCare(s, report) {
+  if (s.food < FULL_AT && avail(s) >= FEED_COST) {
+    s.consumedTokens += FEED_COST;
+    s.food = clamp(s.food + FEED_GAIN, 0, MAX);
+    report.fed++;
+  }
+  if (s.energy < FULL_AT && avail(s) >= PLAY_COST) {
+    s.consumedTokens += PLAY_COST;
+    s.energy = clamp(s.energy + PLAY_GAIN, 0, MAX);
+    report.played++;
+  }
+}
+
 // 경과 시간 시뮬레이션: 10분 틱마다 랜덤 하락 + 행복도(돌봄 + 누적토큰 바닥)
 function simulate(s, tok) {
   // 토큰 적립(설치 후 증가분 누적). 첫 실행/구버전 마이그레이션도 여기서 처리.
@@ -146,23 +167,46 @@ function simulate(s, tok) {
   }
 
   const now = Date.now();
+  const offline = bootCatchUp; // 이번 경과분을 '꺼져 있던 시간'으로 취급할지
+  bootCatchUp = false;
 
-  // 10분 단위 랜덤 하락 (스케줄은 lastDropISO 로 누적)
   let lastDrop = Date.parse(s.lastDropISO) || now;
+  let lastTick = Math.min(Date.parse(s.lastTickISO) || now, now);
+  const report = { fed: 0, played: 0 };
+
+  // 10분 단위 랜덤 하락 (스케줄은 lastDropISO 로 누적).
+  // 꺼져 있던 구간은 틱 단위로 재현: 그 틱까지 행복도 적분 → 하락 → 자동 돌봄.
+  // (밥·체력이 가득 유지된 구간만큼 행복도가 실제로 오른다)
   let guard = 0;
   while (now - lastDrop >= DROP_TICK_MS && guard++ < 100000) {
-    dropRandom(s);
-    lastDrop += DROP_TICK_MS;
+    const tickEnd = lastDrop + DROP_TICK_MS;
+    if (offline) {
+      tickHappiness(s, Math.max(0, tickEnd - lastTick));
+      lastTick = Math.max(lastTick, tickEnd);
+      dropRandom(s);
+      autoCare(s, report);
+    } else {
+      dropRandom(s);
+    }
+    lastDrop = tickEnd;
   }
   s.lastDropISO = new Date(lastDrop).toISOString();
 
-  // 돌봄 기반 행복도(실제 경과 시간만큼 적분)
-  const lastTick = Date.parse(s.lastTickISO) || now;
+  if (report.fed || report.played) careReport = report;
+
+  // 남은 구간(마지막 적분 이후 ~ 지금) 행복도 적분
   tickHappiness(s, Math.max(0, now - lastTick));
   s.lastTickISO = new Date(now).toISOString();
   s.happiness = clamp(s.happiness, 0, MAX);
 
   return s;
+}
+
+// 부팅 직후 펫 창이 1회 가져가는 자동 돌봄 결과 (가져가면 비움)
+function takeCareReport() {
+  const r = careReport;
+  careReport = null;
+  return r;
 }
 
 // ── 기분/메시지 ───────────────────────────────────────────
@@ -262,4 +306,4 @@ function talk() {
   return { line: pickChatter(s.clickCount, s.lang), clickCount: s.clickCount };
 }
 
-module.exports = { getState, feed, play, setName, talk };
+module.exports = { getState, feed, play, setName, talk, takeCareReport };
